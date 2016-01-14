@@ -258,6 +258,7 @@ func restoreRdbEntry(c redigo.Conn, e *rdb.BinEntry) {
 	            }
             }
         }
+        return
     }
     
     if sorted2setKey(e.Key) {
@@ -276,7 +277,8 @@ func restoreRdbEntry(c redigo.Conn, e *rdb.BinEntry) {
 	            }
             }
         }
-    }    
+        return
+    } 
     
     s, err := redigo.String(c.Do(restoreCmd, e.Key, ttlms, e.Value))
     

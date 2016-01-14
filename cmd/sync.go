@@ -303,8 +303,12 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
 		                      log.PanicError(err, "sync zrem error")
 	                       }
                         }
+                    case "del":
+                            _, err := cr.Do("del", args[0])
+                            if err != nil {
+		                      log.PanicError(err, "sync del error")
+	                        }
                     }
-                                                           
                 }
 
                 if sorted2setKey(args[0]) {
@@ -331,8 +335,12 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
 		                      log.PanicError(err, "sync srem error")
 	                       }
                         }
+                    case "del":
+                            _, err := cr.Do("del", args[0])
+                            if err != nil {
+		                      log.PanicError(err, "sync del error")
+	                        }
                     }
-                                                           
                 }
                                 
                 // Some commands like MSET may have multi keys, but we only use
