@@ -109,7 +109,8 @@ Options:
 	-e, --extra                       Set ture to send/receive following redis commands, default is false.
 	--filterdb=DB                     Filter db = DB, default is *.
     --filterkeys=keys                 Filter key in keys, keys is seperated by comma and supports regular expression.
-	--restorecmd=slotsrestore		  Restore command, slotsrestore for codis, restore for redis.
+	--restorecmd=slotsrestore		  Restore command, slotsrestore for codis, restore for redis, if the from and target server are the same, use '--restorecmd=del' will delete the keys, togegher with
+                                      filterkeys, it will delete the keys filtered in the server. 
     --aggregatetype=type              Aggregate type: list or set.
     --aggregatekeys=keys              Aggregate key in keys, keys is seperated by comma and supports regular expression.
     --aggregateTargetKey=key          Target key for aggregating.
