@@ -24,7 +24,8 @@ redis-port dump     [--ncpu=N]   --from=MASTER   [--password=PASSWORD]  [--outpu
 * **SYNC** data from master to slave
 
 ```sh
-redis-port sync     [--ncpu=N]   --from=MASTER   [--password=PASSWORD]  --target=TARGET  [--auth=AUTH]  [--sockfile=FILE [--filesize=SIZE]]  [--filterdb=DB]  [--psync] [--aggregatetype=type] [--aggregatekeys=keys] [--aggregateTargetKey=key]
+redis-port sync     [--ncpu=N]   --from=MASTER   [--password=PASSWORD]  --target=TARGET  [--auth=AUTH]  [--sockfile=FILE [--filesize=SIZE]]  [--filterdb=DB]  [--psync] [--aggregatetype=type] 
+                    [--aggregatekeys=keys] [--aggregateTargetKey=key]  [--set2sortedkeys=keys] [--sorted2setkeys=keys]
 ```
 
 Options
@@ -71,7 +72,8 @@ Options
 
 + --restorecmd=slotsrestore
 
-> Restore command, slotsrestore for codis, restore for redis, default is slotsrestore.
+> Restore command, slotsrestore for codis, restore for redis, default is slotsrestore, if the from and target server are the same, use '--restorecmd=del' will delete the keys, togegher with 
+> filterkeys, it will delete the keys filtered in the server. 
 
 + --aggregatetype=type
 
@@ -84,6 +86,14 @@ Options
 + --aggregateTargetKey=key
 
 > Target key for aggregating.
+
++ --set2sortedkeys=keys
+
+> Convert set key in keys to sorted set, keys is seperated by comma and supports regular expression.
+
++ --sorted2setkeys=keys
+
++ Convert sorted set key in keys to set, keys is seperated by comma and supports regular expression.
 
 Examples
 -------
