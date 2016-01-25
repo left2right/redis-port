@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
+	"os"
 
 	"github.com/docopt/docopt-go"
 	"github.com/wandoulabs/redis-port/pkg/libs/bytesize"
@@ -123,6 +125,25 @@ Options:
 		log.PanicError(err, "parse arguments failed")
 	}
 
+        var input string
+	for {
+                fmt.Printf("Are you sure to continue (yes/no)?\n")
+		_, err := fmt.Scanf("%s\r\n", &input)
+		if err !=nil {
+			log.PanicError(err, "input yes/no err")
+		}
+                switch input {
+        	default:
+                	fmt.Printf("Input the wrong value, you should input yes or no")
+            		continue
+        	case "yes":
+            		goto CONTINUE
+        	case "no":
+            		os.Exit(1)
+        }
+	}
+
+        CONTINUE:
 	if s, ok := d["--ncpu"].(string); ok && s != "" {
 		n, err := parseInt(s, 1, 1024)
 		if err != nil {
