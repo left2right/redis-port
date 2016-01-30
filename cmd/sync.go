@@ -288,27 +288,28 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                     defer cr.Close()
                     switch scmd {
                     default:
-	                   log.Panicf("should not exists at here", scmd)    
+	                   log.Panicf("set2sorted operate %s on key %s err", scmd, args[0])    
                     case "sadd":
                         for i := 1; i < len(args); i++{
                             _, err := cr.Do("zadd", args[0], 1, args[i])
                             if err != nil {
-		                      log.PanicError(err, "sync zadd error")
+		                      log.PanicErrorf(err, "set2sorted zadd %s 1 %s", args[0], args[i])
 	                       }
                         }
                     case "srem":
                         for i := 1; i < len(args); i++{
                             _, err := cr.Do("zrem", args[0], args[i])
                             if err != nil {
-		                      log.PanicError(err, "sync zrem error")
+		                      log.PanicErrorf(err, "set2sorted zrem %s %s", args[0], args[i])
 	                       }
                         }
                     case "del":
                             _, err := cr.Do("del", args[0])
                             if err != nil {
-		                      log.PanicError(err, "sync del error")
+		                      log.PanicErrorf(err, "set2sorted del %s", args[0])
 	                        }
                     }
+                    continue
                 }
 
                 if sorted2setKey(args[0]) {
@@ -316,13 +317,13 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                     defer cr.Close()
                     switch scmd {
                     default:
-	                   log.Panicf("should not exists at here", scmd)    
+	                   log.Panicf("sorted2set operate %s on key %s err", scmd, args[0])    
                     case "zadd":
                         for i := 1; i < len(args); i++{
                             if string(args[i]) != "1" {
                                 _, err := cr.Do("sadd", args[0], args[i])
                                 if err != nil {
-		                            log.PanicError(err, "sync sadd error")
+		                          log.PanicErrorf(err, "sorted2set sadd %s %s", args[0], args[i])
 	                            }
                             } else {
                                 continue
@@ -332,15 +333,16 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                         for i := 1; i < len(args); i++{
                             _, err := cr.Do("srem", args[0], args[i])
                             if err != nil {
-		                      log.PanicError(err, "sync srem error")
+		                      log.PanicErrorf(err, "sorted2set srem %s %s", args[0], args[i])
 	                       }
                         }
                     case "del":
                             _, err := cr.Do("del", args[0])
                             if err != nil {
-		                      log.PanicError(err, "sync del error")
+		                      log.PanicErrorf(err, "sorted2set del %s", args[0])
 	                        }
                     }
+                    continue
                 }
                                 
                 // Some commands like MSET may have multi keys, but we only use

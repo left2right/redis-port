@@ -249,12 +249,13 @@ func restoreRdbEntry(c redigo.Conn, e *rdb.BinEntry) {
 	   }
         switch obj := o.(type) {
         default:
+            log.Panicf("set2sorted key %s type is not set err", e.Key)
 	    log.Panicf("unknown object %v", o)
         case rdb.Set:
             for _, ele := range obj {
                 _, err := c.Do("zadd", e.Key, 1, toText(ele))
                 if err != nil {
-		            log.PanicError(err, "aggregate error")
+                            log.PanicErrorf(err, "set2sorted zadd %s 1 %s", e.Key, toText(ele))
 	            }
             }
         }
@@ -268,12 +269,12 @@ func restoreRdbEntry(c redigo.Conn, e *rdb.BinEntry) {
 	   }
         switch obj := o.(type) {
         default:
-	    log.Panicf("unknown object %v", o)
+            log.Panicf("sorted2set key %s type is not sorted set err", e.Key)
         case rdb.ZSet:
             for _, ele := range obj {                
                 _, err := c.Do("sadd", e.Key, toText(ele.Member))
                 if err != nil {
-		            log.PanicError(err, "aggregate error")
+                            log.PanicErrorf(err, "sorted2set sadd %s %s", e.Key, toText(ele.Member))
 	            }
             }
         }
