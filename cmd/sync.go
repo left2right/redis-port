@@ -270,6 +270,11 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
 					}
 					bypass = !acceptDB(uint32(n))
 				}
+
+		if bypass || (len(args) > 0 && !acceptKey(args[0])) {
+					cmd.nbypass.Incr()
+					continue
+		}
                 
                 if aggregateKey(args[0]) {
                     cr := openRedisConn(target, passwd)
@@ -347,15 +352,11 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                                 
                 // Some commands like MSET may have multi keys, but we only use
 				// first for filter              
-				if bypass || (len(args) > 0 && !acceptKey(args[0])) {
-					cmd.nbypass.Incr()
-					continue
-				}
-			}
-			cmd.forward.Incr()
-			redis.MustEncode(writer, resp)
-			flushWriter(writer)
 		}
+		cmd.forward.Incr()
+		redis.MustEncode(writer, resp)
+		flushWriter(writer)
+	    }
 	}()
 
 	for lstat := cmd.Stat(); ; {
