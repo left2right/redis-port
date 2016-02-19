@@ -284,10 +284,11 @@ func restoreRdbEntry(c redigo.Conn, e *rdb.BinEntry) {
     s, err := redigo.String(c.Do(restoreCmd, e.Key, ttlms, e.Value))
     
 	if err != nil {
-		log.WarnError(err, "restore command error")
+        log.Warnf("restore error, when '%s' '%s'", restoreCmd, e.Key)
+		log.PanicError(err, "restore command error")
 	}
 	if s != "OK" {
-		log.Warnf("restore command response = '%s', should be 'OK'", s)
+		log.Panicf("restore command response = '%s', should be 'OK'", s)
 	}
 }
 
