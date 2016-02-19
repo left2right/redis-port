@@ -14,11 +14,11 @@ import (
 	"time"
 	//"strings"
 
-	"github.com/wandoulabs/redis-port/pkg/libs/atomic2"
-	"github.com/wandoulabs/redis-port/pkg/libs/io/pipe"
-	"github.com/wandoulabs/redis-port/pkg/libs/log"
-	"github.com/wandoulabs/redis-port/pkg/libs/stats"
-	"github.com/wandoulabs/redis-port/pkg/redis"
+	"github.com/left2right/redis-port/pkg/libs/atomic2"
+	"github.com/left2right/redis-port/pkg/libs/io/pipe"
+	"github.com/left2right/redis-port/pkg/libs/log"
+	"github.com/left2right/redis-port/pkg/libs/stats"
+	"github.com/left2right/redis-port/pkg/redis"
 )
 
 type cmdSync struct {

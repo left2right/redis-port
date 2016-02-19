@@ -3,7 +3,7 @@
 
 package redis
 
-import "github.com/wandoulabs/redis-port/pkg/libs/errors"
+import "github.com/left2right/redis-port/pkg/libs/errors"
 
 type Server struct {
 	t HandlerTable

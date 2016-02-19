@@ -10,8 +10,8 @@ import (
 	"io"
 	"strconv"
 
-	"github.com/wandoulabs/redis-port/pkg/libs/errors"
-	"github.com/wandoulabs/redis-port/pkg/rdb/digest"
+	"github.com/left2right/redis-port/pkg/libs/errors"
+	"github.com/left2right/redis-port/pkg/rdb/digest"
 )
 
 type Loader struct {

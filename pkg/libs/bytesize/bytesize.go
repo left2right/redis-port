@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/wandoulabs/redis-port/pkg/libs/errors"
-	"github.com/wandoulabs/redis-port/pkg/libs/log"
+	"github.com/left2right/redis-port/pkg/libs/errors"
+	"github.com/left2right/redis-port/pkg/libs/log"
 )
 
 const (
