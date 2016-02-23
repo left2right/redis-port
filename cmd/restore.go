@@ -93,7 +93,12 @@ func (cmd *cmdRestore) RestoreRDBFile(reader *bufio.Reader, target, passwd strin
 				for e := range pipe {
 					if !acceptDB(e.DB) || !acceptKey(e.Key) {
 						cmd.ignore.Incr()
-					} else {
+					}
+                    else if skipKey(e.Key) {
+                        log.Warnf("restore skip key: %s", e.Key)
+                        cmd.ignore.Incr()
+                    }  
+                    else {
 						cmd.nentry.Incr()
 						if e.DB != lastdb {
 							lastdb = e.DB
@@ -163,6 +168,18 @@ func (cmd *cmdRestore) RestoreCommand(reader *bufio.Reader, target, passwd strin
 					}
 					bypass = !acceptDB(uint32(n))
 				}
+                
+                if skipKey(e.Key) {
+                    log.Warnf("skip key: %s", e.Key)
+                    cmd.ignore.Incr()
+                    continue
+                }
+                               
+				if bypass || (len(args) > 0 && !acceptKey(args[0])) {
+					cmd.nbypass.Incr()
+					continue
+				}
+                
                 // added for aggregating list or set 
                 if aggregateKey(args[0]) {
                     cr := openRedisConn(target, passwd)
@@ -174,11 +191,6 @@ func (cmd *cmdRestore) RestoreCommand(reader *bufio.Reader, target, passwd strin
 	                    }
                     }
                 }
-                
-				if bypass || (len(args) > 0 && !acceptKey(args[0])) {
-					cmd.nbypass.Incr()
-					continue
-				}
 			}
 			cmd.forward.Incr()
 			redis.MustEncode(writer, resp)

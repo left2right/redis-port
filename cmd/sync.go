@@ -204,7 +204,12 @@ func (cmd *cmdSync) SyncRDBFile(reader *bufio.Reader, target, passwd string, nsi
 				for e := range pipe {
 					if !acceptDB(e.DB) || !acceptKey(e.Key)  {
 						cmd.ignore.Incr()
-					} else {
+					}
+                    else if skipKey(e.Key) {
+                        log.Warnf("sync skip key: %s", e.Key)
+                        cmd.ignore.Incr()
+                    } 
+                    else {
 						cmd.nentry.Incr()
 						if e.DB != lastdb {
 							lastdb = e.DB
@@ -271,10 +276,16 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
 					bypass = !acceptDB(uint32(n))
 				}
 
-		if bypass || (len(args) > 0 && !acceptKey(args[0])) {
+		        if bypass || (len(args) > 0 && !acceptKey(args[0])) {
 					cmd.nbypass.Incr()
 					continue
-		}
+		        }
+            
+                if skipKey(e.Key) {
+                    log.Warnf("skip key: %s", e.Key)
+                    cmd.ignore.Incr()
+                    continue
+                }
                 
                 if aggregateKey(args[0]) {
                     cr := openRedisConn(target, passwd)

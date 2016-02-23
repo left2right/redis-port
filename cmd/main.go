@@ -65,6 +65,10 @@ var acceptKey = func(key []byte) bool {
 	return true
 }
 
+var skipKey = func(key []byte) bool {
+	return true
+}
+
 var restoreCmd = "slotsrestore"
 
 var aggregateKey = func(key []byte) bool {
@@ -91,10 +95,10 @@ func main() {
 Usage:
 	redis-port decode   [--ncpu=N]  [--parallel=M]  [--input=INPUT]  [--output=OUTPUT]
 	redis-port restore  [--ncpu=N]  [--parallel=M]  [--input=INPUT]   --target=TARGET   [--auth=AUTH]  [--extra] [--faketime=FAKETIME]  [--filterdb=DB] 
-                        [--filterkeys=keys] [--restorecmd=slotsrestore] [--aggregatetype=type] [--aggregatekeys=keys] [--aggregateTargetKey=key] 
+                        [--filterkeys=keys] [--skipkeys=keys] [--restorecmd=slotsrestore] [--aggregatetype=type] [--aggregatekeys=keys] [--aggregateTargetKey=key] 
 	redis-port dump     [--ncpu=N]  [--parallel=M]   --from=MASTER   [--password=PASSWORD]  [--output=OUTPUT]  [--extra]
 	redis-port sync     [--ncpu=N]  [--parallel=M]   --from=MASTER   [--password=PASSWORD]   --target=TARGET   [--auth=AUTH]  [--sockfile=FILE [--filesize=SIZE]] [--filterdb=DB] [--psync] 
-                        [--filterkeys=keys] [--restorecmd=slotsrestore] [--aggregatetype=type] [--aggregatekeys=keys] [--aggregateTargetKey=key] [--set2sortedkeys=keys] [--sorted2setkeys=keys]
+                        [--filterkeys=keys] [--skipkeys=keys] [--restorecmd=slotsrestore] [--aggregatetype=type] [--aggregatekeys=keys] [--aggregateTargetKey=key] [--set2sortedkeys=keys] [--sorted2setkeys=keys]
 
 Options:
 	-n N, --ncpu=N                    Set runtime.GOMAXPROCS to N.
@@ -111,6 +115,7 @@ Options:
 	-e, --extra                       Set ture to send/receive following redis commands, default is false.
 	--filterdb=DB                     Filter db = DB, default is *.
     --filterkeys=keys                 Filter key in keys, keys is seperated by comma and supports regular expression.
+    --skipkeys=keys                   Skip key in keys, keys is seperated by comma and supports regular expression.
 	--restorecmd=slotsrestore		  Restore command, slotsrestore for codis, restore for redis, if the from and target server are the same, use '--restorecmd=del' will delete the keys, togegher with
                                       filterkeys, it will delete the keys filtered in the server. 
     --aggregatetype=type              Aggregate type: list or set.
@@ -225,6 +230,28 @@ Options:
 		}
 
 		acceptKey = func(key []byte) bool {
+			for _, reg := range keyRegexps {
+				if reg.Match(key) {
+					return true
+				}
+			}
+
+			return false
+		}
+	}
+
+	if s, ok := d["--skipkeys"].(string); ok && s != "" && s != "*" {
+		keys := strings.Split(s, ",")
+
+		keyRegexps := make([]*regexp.Regexp, len(keys))
+		for i, key := range keys {
+			keyRegexps[i], err = regexp.Compile(key)
+			if err != nil {
+				log.PanicError(err, "parse --skipkeys failed")
+			}
+		}
+
+		skipKey = func(key []byte) bool {
 			for _, reg := range keyRegexps {
 				if reg.Match(key) {
 					return true
