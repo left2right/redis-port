@@ -204,12 +204,10 @@ func (cmd *cmdSync) SyncRDBFile(reader *bufio.Reader, target, passwd string, nsi
 				for e := range pipe {
 					if !acceptDB(e.DB) || !acceptKey(e.Key)  {
 						cmd.ignore.Incr()
-					}
-                    else if skipKey(e.Key) {
-                        log.Warnf("sync skip key: %s", e.Key)
-                        cmd.ignore.Incr()
-                    } 
-                    else {
+					} else if skipKey(e.Key) {
+                        			log.Warnf("sync skip key: %s", e.Key)
+                        			cmd.ignore.Incr()
+                    			} else {
 						cmd.nentry.Incr()
 						if e.DB != lastdb {
 							lastdb = e.DB
@@ -247,6 +245,9 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
 	c := openNetConn(target, passwd)
 	defer c.Close()
 
+        cr := openRedisConn(target, passwd)
+        defer cr.Close()
+
 	writer := bufio.NewWriterSize(stats.NewCountWriter(c, &cmd.wbytes), WriterBufferSize)
 	defer flushWriter(writer)
 
@@ -281,15 +282,13 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
 					continue
 		        }
             
-                if skipKey(e.Key) {
-                    log.Warnf("skip key: %s", e.Key)
-                    cmd.ignore.Incr()
-                    continue
-                }
+               		 if skipKey(args[0]) {
+                    		log.Warnf("skip key: %s", args[0])
+                    		cmd.ignore.Incr()
+                    		continue
+                	}
                 
                 if aggregateKey(args[0]) {
-                    cr := openRedisConn(target, passwd)
-                    defer cr.Close()
                     for i := 1; i < len(args); i++{
                         _, err := cr.Do(aggregateCmd, aggregateTarget, args[i])
                         if err != nil {
@@ -300,8 +299,6 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                 
                 // set 2 sorted set in sync command 
                 if set2sortedKey(args[0]) {
-                    cr := openRedisConn(target, passwd)
-                    defer cr.Close()
                     switch scmd {
                     default:
 	                   log.Panicf("set2sorted operate %s on key %s err", scmd, args[0])    
@@ -329,8 +326,6 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                 }
 
                 if sorted2setKey(args[0]) {
-                    cr := openRedisConn(target, passwd)
-                    defer cr.Close()
                     switch scmd {
                     default:
 	                   log.Panicf("sorted2set operate %s on key %s err", scmd, args[0])    

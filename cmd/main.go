@@ -66,7 +66,7 @@ var acceptKey = func(key []byte) bool {
 }
 
 var skipKey = func(key []byte) bool {
-	return true
+	return false
 }
 
 var restoreCmd = "slotsrestore"

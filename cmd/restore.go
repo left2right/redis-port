@@ -93,12 +93,10 @@ func (cmd *cmdRestore) RestoreRDBFile(reader *bufio.Reader, target, passwd strin
 				for e := range pipe {
 					if !acceptDB(e.DB) || !acceptKey(e.Key) {
 						cmd.ignore.Incr()
-					}
-                    else if skipKey(e.Key) {
-                        log.Warnf("restore skip key: %s", e.Key)
-                        cmd.ignore.Incr()
-                    }  
-                    else {
+					} else if skipKey(e.Key) {
+                        			log.Warnf("restore skip key: %s", e.Key)
+                        			cmd.ignore.Incr()
+                    			} else {
 						cmd.nentry.Incr()
 						if e.DB != lastdb {
 							lastdb = e.DB
@@ -169,11 +167,11 @@ func (cmd *cmdRestore) RestoreCommand(reader *bufio.Reader, target, passwd strin
 					bypass = !acceptDB(uint32(n))
 				}
                 
-                if skipKey(e.Key) {
-                    log.Warnf("skip key: %s", e.Key)
-                    cmd.ignore.Incr()
-                    continue
-                }
+                		if skipKey(args[0]) {
+                    			log.Warnf("skip key: %s", args[0])
+                    			cmd.ignore.Incr()
+                    			continue
+                		}
                                
 				if bypass || (len(args) > 0 && !acceptKey(args[0])) {
 					cmd.nbypass.Incr()
