@@ -289,6 +289,7 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                 	}
                 
                 if aggregateKey(args[0]) {
+		    log.Infof("Aggregate Key %s", args[0])
                     for i := 1; i < len(args); i++{
                         _, err := cr.Do(aggregateCmd, aggregateTarget, args[i])
                         if err != nil {

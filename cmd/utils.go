@@ -218,6 +218,7 @@ func restoreRdbEntry(c redigo.Conn, e *rdb.BinEntry) {
 	}
     
     if aggregateKey(e.Key) {
+        log.Infof("Aggregate key %s",e.Key)
         o, err := rdb.DecodeDump(e.Value)
         if err != nil {
 	    log.PanicError(err, "decode failed")
