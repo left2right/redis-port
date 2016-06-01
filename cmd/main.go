@@ -34,6 +34,7 @@ var args struct {
 
 	shift time.Duration
 	psync bool
+	force bool
 }
 
 const (
@@ -97,7 +98,7 @@ Usage:
 	redis-port restore  [--ncpu=N]  [--parallel=M]  [--input=INPUT]   --target=TARGET   [--auth=AUTH]  [--extra] [--faketime=FAKETIME]  [--filterdb=DB] 
                         [--filterkeys=keys] [--skipkeys=keys] [--restorecmd=slotsrestore] [--aggregatetype=type] [--aggregatekeys=keys] [--aggregateTargetKey=key] 
 	redis-port dump     [--ncpu=N]  [--parallel=M]   --from=MASTER   [--password=PASSWORD]  [--output=OUTPUT]  [--extra]
-	redis-port sync     [--ncpu=N]  [--parallel=M]   --from=MASTER   [--password=PASSWORD]   --target=TARGET   [--auth=AUTH]  [--sockfile=FILE [--filesize=SIZE]] [--filterdb=DB] [--psync] 
+	redis-port sync     [--ncpu=N]  [--parallel=M]   --from=MASTER   [--password=PASSWORD]   --target=TARGET   [--auth=AUTH]  [--sockfile=FILE [--filesize=SIZE]] [--filterdb=DB] [--psync] [--force]
                         [--filterkeys=keys] [--skipkeys=keys] [--restorecmd=slotsrestore] [--aggregatetype=type] [--aggregatekeys=keys] [--aggregateTargetKey=key] [--set2sortedkeys=keys] [--sorted2setkeys=keys]
 
 Options:
@@ -124,31 +125,13 @@ Options:
     --set2sortedkeys=keys             Convert set key in keys to sorted set, keys is seperated by comma and supports regular expression.
     --sorted2setkeys=keys             Convert sorted set key in keys to set, keys is seperated by comma and supports regular expression.
 	--psync                           Use PSYNC command.
+	--force                           Use force, do not need to enter "yes", you mustn't use it ,unless you konw what you are doing.
 `
 	d, err := docopt.Parse(usage, nil, true, "", false)
 	if err != nil {
 		log.PanicError(err, "parse arguments failed")
 	}
 
-        var input string
-	for {
-                fmt.Printf("Are you sure to continue (yes/no)?\n")
-		_, err := fmt.Scanf("%s\r\n", &input)
-		if err !=nil {
-			log.PanicError(err, "input yes/no err")
-		}
-                switch input {
-        	default:
-                	fmt.Printf("Input the wrong value, you should input yes or no")
-            		continue
-        	case "yes":
-            		goto CONTINUE
-        	case "no":
-            		os.Exit(1)
-        }
-	}
-
-        CONTINUE:
 	if s, ok := d["--ncpu"].(string); ok && s != "" {
 		n, err := parseInt(s, 1, 1024)
 		if err != nil {
@@ -182,7 +165,31 @@ Options:
 
 	args.extra, _ = d["--extra"].(bool)
 	args.psync, _ = d["--psync"].(bool)
+	args.force, _ = d["--force"].(bool)
 	args.sockfile, _ = d["--sockfile"].(string)
+
+        var input string
+	for {
+		if args.force {
+            		goto CONTINUE
+		}
+                fmt.Printf("Are you sure to continue (yes/no)?\n")
+		_, err := fmt.Scanf("%s\r\n", &input)
+		if err !=nil {
+			log.PanicError(err, "input yes/no err")
+		}
+                switch input {
+        	default:
+                	fmt.Printf("Input the wrong value, you should input yes or no")
+            		continue
+        	case "yes":
+            		goto CONTINUE
+        	case "no":
+            		os.Exit(1)
+        }
+	}
+
+        CONTINUE:
 
 	if s, ok := d["--faketime"].(string); ok && s != "" {
 		switch s[0] {
@@ -263,7 +270,7 @@ Options:
 	}
 
 	if s, ok := d["--restorecmd"].(string); ok && s != "" {
-		restoreCmd = s
+		restoreCmd = strings.TrimSpace(s)
 	}
 
 	if s, ok := d["--aggregatekeys"].(string); ok && s != "" && s != "*" {
