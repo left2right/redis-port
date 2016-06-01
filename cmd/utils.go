@@ -282,15 +282,23 @@ func restoreRdbEntry(c redigo.Conn, e *rdb.BinEntry) {
         return
     } 
     
-    s, err := redigo.String(c.Do(restoreCmd, e.Key, ttlms, e.Value))
+    if (restoreCmd == "del") || (restoreCmd == "DEL") {
+	_, err := redigo.String(c.Do(restoreCmd, e.Key))
+	if err != nil {
+        	log.Warnf("delete key: '%s'", e.Key)
+	}
+    } else {
+    	s, err := redigo.String(c.Do(restoreCmd, e.Key, ttlms, e.Value))
     
 	if err != nil {
         log.Warnf("restore error, when '%s' '%s'", restoreCmd, e.Key)
-		log.PanicError(err, "restore command error")
+		//log.PanicError(err, "restore command error")
 	}
 	if s != "OK" {
-		log.Panicf("restore command response = '%s', should be 'OK'", s)
+		//log.Panicf("restore command response = '%s', should be 'OK'", s)
+		log.Warnf("restore command response = '%s', should be 'OK'", s)
 	}
+    }
 }
 
 func iocopy(r io.Reader, w io.Writer, p []byte, max int) int {
