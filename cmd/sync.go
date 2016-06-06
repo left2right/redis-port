@@ -288,12 +288,13 @@ func (cmd *cmdSync) SyncCommand(reader *bufio.Reader, target, passwd string) {
                     		continue
                 	}
                 
-                if aggregateKey(args[0]) {
+                if aggregateKey(args[0]) && ((scmd == "lpush") || (scmd =="LPUSH")) {
 		    log.Infof("Aggregate Key %s", args[0])
                     for i := 1; i < len(args); i++{
                         _, err := cr.Do(aggregateCmd, aggregateTarget, args[i])
                         if err != nil {
-		                    log.PanicError(err, "sync aggregate error")
+                    		log.Warnf("SyncAggregate err at: %s %s", args[0], args[i])
+		                //log.PanicError(err, "sync aggregate error")
 	                    }
                     }
                 }
